@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
-#include "state_defines.h"
+#include "cell_state_defines.h"
 
 #define AREA_SIZE 10
 
@@ -55,6 +55,8 @@ typedef struct CellHandle
 BattleGame_t* allocGame();
 void freeGame(BattleGame_t* game);
 
+ShipCell_t* getShip(CellHandle_t h);
+
 byte_t currentPlayer(BattleGame_t* game);
 byte_t cellType(ShipCell_t* ship);
 
@@ -63,6 +65,7 @@ void clearAreas(BattleGame_t* game);
 #define err_t byte_t
 err_t createShipCell(CellHandle_t h); //for ships setup
 err_t removeShipCell(CellHandle_t h); //
+err_t reverseShipCell(CellHandle_t h);
 
 err_t fillUpShips(BattleGame_t* game, byte_t player);
 
@@ -71,5 +74,13 @@ err_t fillUpShips(BattleGame_t* game, byte_t player);
 */
 err_t makeShoot(CellHandle_t h);
 
+
+//service functions, static in .c file
+static void setCellType(CellHandle_t h, byte_t type);
+static bool isOutOfRnage(Point_t point);
+static Point_t determineDirection(CellHandle_t h);
+static byte_t determineSize(CellHandle_t h, Point_t direction);
+static bool isPointHaveCollision(CellHandle_t h, Point_t direction);
+static bool isShipCountCorrect(int* shipCount);
 
 #endif
