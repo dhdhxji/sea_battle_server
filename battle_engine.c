@@ -33,8 +33,8 @@ byte_t cellType(ShipCell_t* ship)
 static void setCellType(CellHandle_t h, byte_t type)
 {
     getShip(h)->_cellType = type;
-
-    //TODO: notify Server();
+    if(updateCallBack != NULL)
+        updateCallBack(h);
 }
 
 
@@ -114,10 +114,25 @@ static Point_t determineDirection(CellHandle_t h)
     Point_t verticalNext = {h.point.x, h.point.y+1};
 
     Point_t direction = {1, 0};
-                
-    if(getShip((CellHandle_t){h.game, h.player, horizontalNext})->_cellType == CELL_SHIP)
+    
+    byte_t rightCell;
+    if(isOutOfRnage(horizontalNext))
+        rightCell = CELL_SEA;
+    else
+        rightCell = getShip((CellHandle_t){h.game, h.player, horizontalNext})->_cellType;
+
+
+    byte_t bottomCell;
+    if(isOutOfRnage(verticalNext))
+        bottomCell = CELL_SEA;
+    else
+        bottomCell = getShip((CellHandle_t){h.game, h.player, verticalNext})->_cellType;
+
+
+
+    if(rightCell == CELL_SHIP)
         direction = (Point_t){1, 0};
-    else if(getShip((CellHandle_t){h.game, h.player, verticalNext})->_cellType == CELL_SHIP)
+    else if(bottomCell == CELL_SHIP)
         direction = (Point_t){0, 1};
 
     return direction;
@@ -158,8 +173,21 @@ static bool isPointHaveCollision(CellHandle_t h, Point_t direction)
         CellHandle_t col1Cell = {h.game, h.player, side1};
         CellHandle_t col2Cell = {h.game, h.player, side2};
         
-        if(getShip(col1Cell)->_cellType == CELL_SHIP ||
-            getShip(col2Cell)->_cellType == CELL_SHIP)
+        byte_t cell1;
+        byte_t cell2;
+
+        if(isOutOfRnage(side1))
+            cell1 = CELL_SEA;
+        else
+            cell1 = getShip(col1Cell)->_cellType;
+        
+        
+        if(isOutOfRnage(side2))
+            cell2 = CELL_SEA;
+        else
+            cell2 = getShip(col2Cell)->_cellType;
+
+        if(cell1 == CELL_SHIP || cell2 == CELL_SHIP)
             return true;
     }
 
@@ -245,10 +273,48 @@ err_t fillUpShips(BattleGame_t* game, byte_t player)
     return NO_ERR;
 }
 
+void eraseDamage(BattleGame_t* game, int player)
+{  
+    for(int y = 0; y < AREA_SIZE; ++y)
+    {
+        for(int x = 0; x < AREA_SIZE; ++x)
+        {
+            CellHandle_t h = {game, player, (Point_t){x, y}};
+            ShipCell_t* cell = getShip(h);
+
+            switch (cell->_cellType)
+            {
+            case CELL_SEA_SHOTED: setCellType(h, CELL_SEA); break;
+            case CELL_SHIP_KILLED: setCellType(h, CELL_SHIP); break;
+            case CELL_SHIP_WOUNDED: setCellType(h, CELL_SHIP); break;
+            }
+        }
+    }
+    game->shipCount[player]=10;  
+}
+
+void clearPlayerArea(BattleGame_t* game, int pl)
+{
+    game->shipCount[pl] = 0;
+    for(int y = 0; y < AREA_SIZE; ++y)
+    {
+        for(int x = 0; x < AREA_SIZE; ++x)
+        {
+            ShipCell_t* cell = &game->area[pl][y][x];
+            if(cell->_cellType != CELL_SEA)
+            {
+                setCellType((CellHandle_t){game, pl, (Point_t){x, y}}, CELL_SEA);
+                cell->_directionVector = (Point_t){0};
+                cell->_startPos = (Point_t){0};
+            }
+        }
+    }
+}
+
 
 err_t makeShoot(CellHandle_t h) 
 {
-
+    //shooted cell handled
     switch(getShip(h)->_cellType)
     {
         case CELL_SEA:

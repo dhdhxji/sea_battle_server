@@ -51,6 +51,8 @@ typedef struct CellHandle
 }CellHandle_t;
 
 
+void (*updateCallBack)(CellHandle_t);
+
 
 BattleGame_t* allocGame();
 void freeGame(BattleGame_t* game);
@@ -69,10 +71,13 @@ err_t reverseShipCell(CellHandle_t h);
 
 err_t fillUpShips(BattleGame_t* game, byte_t player);
 
+void eraseDamage(BattleGame_t* game, int player);
+void clearPlayerArea(BattleGame_t* game, int player);
 /*
 *shoot the player in handle
 */
 err_t makeShoot(CellHandle_t h);
+
 
 
 //service functions, static in .c file

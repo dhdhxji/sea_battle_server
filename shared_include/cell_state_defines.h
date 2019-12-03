@@ -1,5 +1,5 @@
-#ifndef STATE_DEFINES
-#define STATE_DEFINES
+#ifndef CELL_STATE_DEFINES
+#define CELL_STATE_DEFINES
 
 //cell type defines
 #define CELL_SEA 0
@@ -23,6 +23,7 @@
 #define ERR_AREA_ALREADY_SHOOTED 4
 #define ERR_SHIP_COLLISIONS_DETECTED 5
 #define ERR_SHIP_COUNT_INCORRECT 6
+#define ERR_GAME_STARTED 7
 
 
 #endif
