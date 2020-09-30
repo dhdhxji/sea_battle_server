@@ -6,5 +6,5 @@ int main()
     setupServer(DEFAULT_PORT, STDIN_FILENO);
     runServer();
 
-    return 0;
+    return 1;
 }
